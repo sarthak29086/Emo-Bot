@@ -69,24 +69,36 @@ def publish_emotion_to_ros(emotion: str) -> bool:
     # Escape single quotes inside the phrase for bash safety
     ros_data_escaped = ros_data.replace("'", "'\\''")
 
-    bash_cmd = (
-        "export ROS_LOCALHOST_ONLY=0 && "
-        "source /opt/ros/humble/setup.bash && "
+    # Use exactly the same command structure as running manually in a WSL terminal.
+    # bash -i loads .bashrc (which sources ROS2 humble), giving the full interactive environment
+    # that is needed for Unreal Engine to receive the ROS2 messages over the WSL network bridge.
+    ros_cmd = (
         f"ros2 topic pub -1 /speech std_msgs/msg/String "
         f"\"{{data: '{ros_data_escaped}'}}\""
     )
 
     try:
         logger.info("ROS publisher: publishing emotion='%s' → '%s'", emotion, phrase)
-        subprocess.Popen(
-            ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", bash_cmd],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+        proc = subprocess.Popen(
+            ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-i", "-c", ros_cmd],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
+        logger.info("ROS publisher: command dispatched (PID=%s).", proc.pid)
         # Update cooldown state
         _last_publish_time = now
         _last_published_emotion = emotion
         logger.info("ROS publisher: command dispatched to WSL successfully.")
+        # Log stderr in background so we can see if there are any ROS2 errors
+        def _log_stderr(p):
+            try:
+                _, stderr_out = p.communicate(timeout=15)
+                if stderr_out:
+                    logger.warning("ROS publisher stderr: %s", stderr_out.decode(errors='replace').strip())
+            except Exception:
+                pass
+        import threading
+        threading.Thread(target=_log_stderr, args=(proc,), daemon=True).start()
         return True
 
     except Exception as exc:
