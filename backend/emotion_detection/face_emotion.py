@@ -35,7 +35,10 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from deepface import DeepFace
-from fer import FER
+try:
+    from fer import FER  # fer<=22.x
+except ImportError:
+    from fer.fer import FER  # fer>=25.x
 
 from .fer_cnn import FERCustomCNN
 

@@ -13,12 +13,13 @@ Fixes (v2.1):
     POST /api/fuse_emotions (analytics dashboard alias)
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 from emotion_detection.face_emotion import FaceEmotionDetector, EmotionResult
 from emotion_detection.fusion import fuse_emotions
 from dependencies import face_detector, voice_detector
+from api.ros_publisher import publish_emotion_to_ros
 
 router = APIRouter(prefix="/api", tags=["Emotion Detection"])
 
@@ -93,8 +94,12 @@ def _face_detect_logic(image_base64: str) -> FaceEmotionResponse:
 
 # Primary route
 @router.post("/detect/face", response_model=FaceEmotionResponse)
-async def detect_face_emotion(body: FaceEmotionRequest):
-    return _face_detect_logic(body.image_base64)
+async def detect_face_emotion(body: FaceEmotionRequest, background_tasks: BackgroundTasks):
+    result = _face_detect_logic(body.image_base64)
+    # Fire ROS2 speech publish if a real emotion is detected (non-neutral, face present)
+    if not result.no_face_detected and result.dominant_emotion != "neutral":
+        background_tasks.add_task(publish_emotion_to_ros, result.dominant_emotion)
+    return result
 
 
 # Legacy alias (used by some older frontend code)
@@ -164,12 +169,15 @@ def _fuse_logic(
 
 # Primary route
 @router.post("/fuse", response_model=FusionResponse)
-async def multimodal_fusion(body: FusionRequest):
+async def multimodal_fusion(body: FusionRequest, background_tasks: BackgroundTasks):
     """Weighted combination of face and voice emotions."""
-    return _fuse_logic(
+    result = _fuse_logic(
         body.face_emotion, body.face_confidence,
         body.voice_emotion, body.voice_confidence,
     )
+    # Fire ROS2 speech publish in background (non-blocking, 20s cooldown, skips neutral)
+    background_tasks.add_task(publish_emotion_to_ros, result.fused_emotion)
+    return result
 
 
 # Alias — used by AnalyticsDashboard.tsx (was calling wrong URL)

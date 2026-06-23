@@ -1,13 +1,42 @@
-.venv/
+# Python Cache
 __pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+
+# Databases & Vector Stores
+*.db
+*.sqlite3
+backend/data/chroma_db/
+backend/sql_app.db
+
+# Environment Variables
 .env
+.env.*
+backend/.env
+
+# Machine Learning / Models
 *.pth
 *.pt
 *.h5
 *.ckpt
-training/
-data/
-backend/training/data/
+*.onnx
+
+# Media / Outputs
 *.wav
-.env
-backend/.env
+*.mp3
+*.mp4
+
+# Frontend Dependencies & Builds
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+.eslintcache
+
+# OS-specific files
+.DS_Store
+Thumbs.db
