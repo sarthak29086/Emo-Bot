@@ -39,4 +39,14 @@ frontend/build/
 
 # OS-specific files
 .DS_Store
-Thumbs.db
+Thumbs.db
+
+# Unreal Engine Project
+unreal/Binaries/
+unreal/Intermediate/
+unreal/Saved/
+unreal/DerivedDataCache/
+unreal/Build/
+unreal/.vs/
+unreal/*.sln
+unreal/input.json

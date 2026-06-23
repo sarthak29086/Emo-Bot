@@ -140,3 +140,57 @@ The bridge acts as the glue between the backend CLI commands and the Unreal Engi
      ```
    - The WSL Bridge receives this subscription, logs `Speaking...` and writes the message text to `/mnt/d/Unreal_Projects/Final_V2/input.json`.
    - Your Unreal Engine project reads the JSON to synchronize the MetaHuman's expressions and voice.
+
+---
+
+## Pushing the Unreal Engine 5 Project to GitHub
+
+Unreal Engine 5 projects contain large binary assets (`.uasset`, `.umap`) and temporary compiler/cache files that can easily exceed several gigabytes. Because GitHub has a strict **100MB limit for single files** (such as the `Natalia.uasset` file in this project, which is **168MB**), you **cannot** push the project directly without proper configuration.
+
+To successfully version and push your Unreal Engine project into this repository, follow these steps:
+
+### 1. Install Git LFS (Large File Storage)
+If you haven't already, download and install [Git LFS](https://git-lfs.github.com/). Once installed, open your command prompt/terminal on Windows and run:
+```cmd
+git lfs install
+```
+
+### 2. Configure Git LFS and Ignore Files in the Root
+We need to ensure that:
+1. Binary assets are tracked by Git LFS rather than standard Git.
+2. Large temporary cache directories (`Intermediate/`, `Saved/`, `DerivedDataCache/`, etc.) are ignored to prevent repository bloat (configured in `.gitignore`).
+
+Create a `.gitattributes` file in the root of the repository to track Unreal binaries. We have created a helper template for you. If you need to make one manually, the contents are:
+```gitattributes
+# Track Unreal Engine binary assets via Git LFS
+unreal/Content/**/*.uasset filter=lfs diff=lfs merge=lfs -text
+unreal/Content/**/*.umap filter=lfs diff=lfs merge=lfs -text
+*.uasset filter=lfs diff=lfs merge=lfs -text
+*.umap filter=lfs diff=lfs merge=lfs -text
+```
+
+### 3. Copy/Move your Unreal Project into the Repo
+Create a folder named `unreal` in this repository:
+```cmd
+mkdir unreal
+```
+
+Copy the following files and folders from `D:\Unreal_Projects\Final_V2` into this new `unreal/` directory:
+- `Config/` (Folder containing setup config)
+- `Content/` (Folder containing MetaHumans and blueprints)
+- `Final_V2.uproject` (The main project descriptor)
+
+> [!WARNING]
+> Do **NOT** copy the `Binaries/`, `Intermediate/`, `Saved/`, or `DerivedDataCache/` folders. They are generated dynamically when Unreal Engine launches and will bloat the repository with gigabytes of local cache.
+
+### 4. Commit and Push
+Once the files are copied and `.gitattributes` is in place, stage and push the changes:
+```cmd
+git add .gitattributes
+git add .gitignore
+git add unreal/
+git commit -m "feat: add Unreal Engine 5 project files"
+git push origin main
+```
+
+*(Note: Pushing large LFS files can take a few minutes depending on your internet upload speed. GitHub's free plan includes 1GB of free Git LFS storage; if your project is larger than 1GB, you may run out of LFS quota. If that occurs, we recommend creating a separate dedicated repository for the Unreal project).*
