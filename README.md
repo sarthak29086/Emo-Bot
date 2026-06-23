@@ -1,6 +1,30 @@
 # EmoBot: Emotion-Aware Conversational Robot System
 
-An end-to-end, multi-agent conversational robotic digital twin system. This project integrates real-time facial emotion recognition, an AI/RL-powered conversational backend, a ROS2-based command publisher, and an Unreal Engine 5 MetaHuman interface.
+EmoBot is an end-to-end, multi-agent conversational robotic digital twin system designed to create empathetic, responsive virtual agents. It captures human facial emotional states in real-time and translates them into interactive conversational actions and behaviors on a high-fidelity Unreal Engine 5 MetaHuman.
+
+---
+
+## 💡 About the Project
+
+### What is this project about?
+Modern conversational AI often lacks situational context and emotional empathy. This project builds a real-time reactive bridge between a user's physical emotional expressions (captured via webcam) and a digital twin's responses. When a user looks angry, sad, or happy, the digital twin detects this transition, adapts its internal state, and speaks with context-appropriate responses, creating a highly realistic human-to-digital-twin conversational loop.
+
+### What we did
+We designed and implemented a full data and execution pipeline spanning web development, deep learning, robotic middlewares, and gaming engine animations:
+1. Built a camera-based real-time **facial expression detector** on a web client.
+2. Constructed a central **orchestration backend** to manage state, filter idle inputs, and coordinate message dispatches.
+3. Configured an interactive **WSL2-to-Windows communication bridge** using ROS2 message passing.
+4. Programmed a **dynamic file polling watcher** inside Unreal Engine 5 to drive voice lip-sync and narrative animations on a MetaHuman.
+
+### How we did it
+We integrated a stack of modern, cross-platform technologies:
+* **Real-Time Classification**: Used standard cameras and **Facial Emotion Recognition (FER)** deep learning models in a React web client to stream emotion frames.
+* **API Orchestration**: Engineered a **FastAPI** server on Windows to filter emotions and manage event cycles (with a 20-second cooldown per event).
+* **Robotics Middleware**: Utilized **ROS2 Humble** running in a WSL2 Ubuntu environment. The backend dispatches interactive ROS2 commands directly, which are processed by a dedicated **ROS2 Bridge subscription node**.
+* **Engine Integration & AI Speech**: Configured **Unreal Engine 5** with the **VaRest** JSON utility to read bridge events, and integrated **ConvAI** to drive the MetaHuman's natural language responses and visual lipsyncing dynamically.
+
+---
+
 
 ```
 +--------------------+       +----------------------+       +-------------------------+
