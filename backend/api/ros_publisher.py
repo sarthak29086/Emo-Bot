@@ -70,6 +70,7 @@ def publish_emotion_to_ros(emotion: str) -> bool:
     ros_data_escaped = ros_data.replace("'", "'\\''")
 
     bash_cmd = (
+        "export ROS_LOCALHOST_ONLY=0 && "
         "source /opt/ros/humble/setup.bash && "
         f"ros2 topic pub -1 /speech std_msgs/msg/String "
         f"\"{{data: '{ros_data_escaped}'}}\""
