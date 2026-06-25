@@ -209,3 +209,5 @@ Open `http://localhost:5173` in your browser and grant webcam permissions.
 This repository is configured to version the Unreal project **blueprints and config settings** without the heavy 1.5GB binary assets.
 * See [unreal/README.md](unreal/README.md) for how to use Git LFS or push level configurations.
 * See [unreal/blueprints/json_watcher_nodes.txt](unreal/blueprints/json_watcher_nodes.txt) for copy-pasteable blueprint graphs.
+
+*Built with ❤️ by the EmoDynamics team during the HCL Hack60 Hackathon.*
